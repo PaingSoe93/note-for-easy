@@ -1,0 +1,95 @@
+Step 1 – Installing the Nginx Web Server
+
+sudo apt update
+sudo apt install nginx
+
+
+Step 2 – Installing MySQL
+
+sudo apt install mysql-server
+sudo mysql_secure_installation
+
+Create Root User and Set Password
+
+sudo mysql
+SELECT user,authentication_string,plugin,host FROM mysql.user;
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
+FLUSH PRIVILEGES;
+SELECT user,authentication_string,plugin,host FROM mysql.user;
+exit
+
+Create Database
+
+mysql -u root -p
+CREATE DATABASE database_name;
+SHOW DATABASES;
+GRANT ALL ON database_name.* TO 'db_user'@'localhost' IDENTIFIED BY 'password' WITH GRANT OPTION;  //Optional
+exit
+
+Step 3 – Installing PHP
+
+sudo apt install php-fpm php-mysql php-cli php-mbstring php-xml php-bcmath git unzip
+
+Install Composer:
+
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+sudo chmod +x /usr/local/bin/composer
+
+Step 4 - Configuring Nginx
+
+sudo vi /etc/nginx/sites-available/example.com
+
+server {
+        listen 80;
+        root /var/www/html;
+        index index.php index.html index.htm index.nginx-debian.html;
+        server_name example.com;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+        location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+                fastcgi_pass unix:/var/run/php/php7.2-fpm.sock;
+        }
+
+        location ~ /\.ht {
+                deny all;
+        }
+}
+
+sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/
+sudo unlink /etc/nginx/sites-enabled/default
+
+Note: If you ever need to restore the default configuration, you can do so by recreating the symbolic link, like this:
+
+sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
+
+sudo systemctl reload nginx
+
+Step 5 – Creating a PHP File to Test Configuration
+
+sudo nano /var/www/html/info.php
+
+<?php
+phpinfo();
+
+Step 6 - Create Laravel Application
+
+sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
+sudo /sbin/mkswap /var/swap.1
+sudo /sbin/swapon /var/swap.1
+
+free -m
+
+composer create-project --prefer-dist laravel/laravel blog
+
+cd blog
+chmod -R 775 storage
+chmod -R 775 bootstrap/cache
+
+//Change Nginx config to Project Public Dir and Reload...
+
+sudo systemctl reload nginx
