@@ -1,0 +1,98 @@
+Step 1 – Installing the Nginx Web Server
+
+sudo apt update
+sudo apt install nginx
+
+Step 2 - Installing Node JS with NVM
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+logout
+command -v nvm
+nvm ls-remote
+nvm install v12.16.3
+npm i -g yarn pm2
+
+Step 3 - Nginx Config
+
+sudo vi /etc/nginx/sites-available/example.com
+
+
+------- Config 1 ---------
+
+server {
+  listen 80;
+  server_name www.example.com example.com;
+
+  location / {
+        root /var/www/html/dist;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+   }
+
+  location /api {
+        rewrite /api/(.*) /$1 break;
+        proxy_pass http://localhost:5000; #change port to your node.js port
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+  }
+}
+
+------- Config 2 ---------
+
+server {
+    listen      80;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen       443 ssl;
+    server_name  example.com;
+
+    #charset koi8-r;
+    #access_log  /var/log/nginx/log/host.access.log  main;
+
+   ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem; # managed by Certbot
+   ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem; # managed by Certbot
+
+   include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+
+   location /admin/ {
+        alias /var/www/html/dist/;
+        try_files $uri$args $uri$args/ /admin/index.html;
+   }
+
+   location /api {
+        rewrite /api/(.*) /$1 break;
+        proxy_pass http://localhost:5000; #change port to your node.js port
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location / {
+        root /var/www/html/build;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/
+sudo unlink /etc/nginx/sites-enabled/default
+
+sudo service nginx stop
+sudo service nginx start
+sudo service nginx status
+
+Step 4 - Install Certbot
+
+sudo add-apt-repository ppa:certbot/certbot
+sudo apt install python-certbot-nginx
+
+sudo certbot --nginx -d example.com -d www.example.com
+sudo certbot renew --dry-run
+

@@ -93,3 +93,11 @@ chmod -R 775 bootstrap/cache
 //Change Nginx config to Project Public Dir and Reload...
 
 sudo systemctl reload nginx
+
+Step 7 - Install Certbot
+
+sudo add-apt-repository ppa:certbot/certbot
+sudo apt install python-certbot-nginx
+
+sudo certbot --nginx -d example.com -d www.example.com
+sudo certbot renew --dry-run
