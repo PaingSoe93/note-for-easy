@@ -47,7 +47,7 @@ server {
         server_name example.com;
 
         location / {
-                try_files $uri $uri/ =404;
+                try_files $uri $uri/ /index.php;
         }
 
         location ~ \.php$ {
@@ -85,6 +85,14 @@ sudo /sbin/swapon /var/swap.1
 free -m
 
 composer create-project --prefer-dist laravel/laravel blog
+
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
+
+php artisan config:cache
+php artisan config:clear
+php artisan cache:clear
 
 cd blog
 chmod -R 775 storage
