@@ -1,0 +1,75 @@
+sudo apt -y update
+sudo apt -y upgrade
+
+sudo apt -y install unzip
+
+sudo fallocate -l 1G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+free -m
+
+sudo apt -y install nginx
+sudo systemctl enable nginx
+sudo systemctl start nginx
+sudo systemctl status nginx
+
+
+sudo apt -y install php-fpm php-mysql php-cli php-zip php-mbstring php-xml
+
+sudo curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+
+
+sudo apt -y install mariadb-server
+sudo mysql_secure_installation
+
+Enter current password for root (enter for none):
+Set root password? [Y/n] y
+Remove anonymous users? [Y/n] y
+Disallow root login remotely? [Y/n] y
+Remove test database and access to it? [Y/n] y
+Reload privilege tables now? [Y/n] y
+
+
+sudo systemctl enable mariadb
+sudo systemctl start mariadb
+sudo systemctl status mariadb
+
+
+cd /var/www/
+
+sudo composer create-project --prefer-dist laravel/laravel laravel
+
+sudo chmod -R 755 /var/www/laravel/
+
+
+sudo vim /etc/nginx/sites-available/laravel
+
+
+server {
+    listen 80;
+    listen [::]:80;
+    root /var/www/laravel/public;
+    index  index.php index.html index.htm;
+    server_name  laravel.test;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;        
+    }
+
+  
+    location ~ \.php$ {
+       include snippets/fastcgi-php.conf;
+       fastcgi_pass             unix:/var/run/php/php7.4-fpm.sock;
+       fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+}
+
+
+sudo ln -s /etc/nginx/sites-available/laravel /etc/nginx/sites-enabled/
+sudo unlink /etc/nginx/sites-enabled/default
+
+sudo nginx -t
+
+sudo systemctl restart nginx
