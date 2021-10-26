@@ -89,7 +89,20 @@ sudo service nginx stop
 sudo service nginx start
 sudo service nginx status
 
-Step 4 - Install Certbot
+Step 6 - Postgres SQL
+
+sudo apt update
+
+sudo apt install postgresql postgresql-contrib
+
+sudo -i -u postgres
+
+psql
+
+CREATE ROLE myuser LOGIN PASSWORD 'mypass';
+CREATE DATABASE mydatabase WITH OWNER = myuser;
+
+Step 5 - Install Certbot
 
 sudo add-apt-repository ppa:certbot/certbot
 sudo apt install python-certbot-nginx
