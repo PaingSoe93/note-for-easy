@@ -1,0 +1,12 @@
+Step 1 – Installing the Nginx Web Server
+
+sudo apt update
+sudo apt install nginx
+
+Step 2 - Installing Node JS with NVM
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+
+Step 3 - CertBot Setup
+
+https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-22-04

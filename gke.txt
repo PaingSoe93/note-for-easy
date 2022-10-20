@@ -1,0 +1,3 @@
+create context
+
+gcloud container cluster get-credentials <cluster_name>
